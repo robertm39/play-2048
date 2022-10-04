@@ -31,7 +31,7 @@ pub enum Move {
 
 // Return the state of the board after sliding the tiles in the specified direction.
 // Tested.
-pub fn after_slide_tiles(mut gs: BoardState, m: &Move) -> BoardState{
+pub fn slide_tiles(gs: &mut BoardState, m: &Move){
     match m {
         Move::Up => {
             for x in 0..BOARD_SIZE {
@@ -98,12 +98,12 @@ pub fn after_slide_tiles(mut gs: BoardState, m: &Move) -> BoardState{
             }
         }
     }
-    gs
+    //gs
 }
 
 // Return the board state after merging tiles in the specified direction.
 // Has been tested.
-pub fn after_merge_tiles(mut gs: BoardState, m: &Move) -> BoardState {
+pub fn merge_tiles(gs: &mut BoardState, m: &Move) {
     match m {
         Move::Up => {
             for x in 0..BOARD_SIZE {
@@ -158,14 +158,17 @@ pub fn after_merge_tiles(mut gs: BoardState, m: &Move) -> BoardState {
             }
         }
     }
-    gs
+    //gs
 }
 
 // Return the state of the board after making the specified move.
 // Seems to work.
 pub fn after_move(mut gs: BoardState, m: &Move) -> BoardState {
-    gs = after_slide_tiles(gs, m);
-    gs = after_merge_tiles(gs, m);
-    gs = after_slide_tiles(gs, m);
+    slide_tiles(&mut gs, m);
+    merge_tiles(&mut gs, m);
+    slide_tiles(&mut gs, m);
+    // gs = after_slide_tiles(gs, m);
+    // gs = after_merge_tiles(gs, m);
+    // gs = after_slide_tiles(gs, m);
     gs
 }
