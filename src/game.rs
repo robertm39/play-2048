@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 
-const BOARD_SIZE: usize = 4;
+pub const BOARD_SIZE: usize = 4;
 
 // The state of the game.
 // Contains a 4x4 grid of integers.
@@ -11,7 +11,7 @@ const BOARD_SIZE: usize = 4;
 // This is enough to hold all tiles obtainable in a normal 2048 game.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct BoardState {
-    board: [[u8;BOARD_SIZE];BOARD_SIZE]
+    pub board: [[u8;BOARD_SIZE];BOARD_SIZE]
 }
 
 impl BoardState {
