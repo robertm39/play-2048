@@ -1,5 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 
+use crate::prelude::*;
+
 const BOARD_SIZE: usize = 4;
 
 // The state of the game.
@@ -7,7 +9,7 @@ const BOARD_SIZE: usize = 4;
 // The integer n represents the tile 2^n.
 // The integer 0 represents absence of a tile.
 // This is enough to hold all tiles obtainable in a normal 2048 game.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct BoardState {
     board: [[u8;BOARD_SIZE];BOARD_SIZE]
 }
@@ -41,7 +43,7 @@ impl BoardState {
 }
 
 // The moves a player can make.
-#[derive(Debug)]
+#[derive(Debug, EnumIter)]
 pub enum Move {
     Up,
     Down,
@@ -66,72 +68,6 @@ pub fn slide_tiles(gs: &mut BoardState, m: &Move){
             }
         }
     }
-    // match m {
-    //     Move::Up => {
-    //         for x in 0..BOARD_SIZE {
-    //             let mut target_y = 0;
-    //             for y in 0..BOARD_SIZE {
-    //                 if gs.board[x][y] != 0 {
-    //                     if target_y != y {
-    //                         // Slide this tile down to the first empty spot
-    //                         gs.board[x][target_y] = gs.board[x][y];
-    //                         gs.board[x][y] = 0;
-    //                     }
-
-    //                     target_y += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Down => {
-    //         for x in 0..BOARD_SIZE {
-    //             let mut target_y = BOARD_SIZE-1;
-    //             for y in (0..BOARD_SIZE).rev() {
-    //                 if gs.board[x][y] != 0 {
-    //                     if target_y != y {
-    //                         // Slide this tile down to the first empty spot
-    //                         gs.board[x][target_y] = gs.board[x][y];
-    //                         gs.board[x][y] = 0;
-    //                     }
-
-    //                     target_y -= 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Left => {
-    //         for y in 0..BOARD_SIZE {
-    //             let mut target_x = 0;
-    //             for x in 0..BOARD_SIZE {
-    //                 if gs.board[x][y] != 0 {
-    //                     if target_x != x {
-    //                         // Slide this tile down to the first empty spot
-    //                         gs.board[target_x][y] = gs.board[x][y];
-    //                         gs.board[x][y] = 0;
-    //                     }
-
-    //                     target_x += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Right => {
-    //         for y in 0..BOARD_SIZE {
-    //             let mut target_x = BOARD_SIZE-1;
-    //             for x in (0..BOARD_SIZE).rev() {
-    //                 if gs.board[x][y] != 0 {
-    //                     if target_x != x {
-    //                         // Slide this tile down to the first empty spot
-    //                         gs.board[target_x][y] = gs.board[x][y];
-    //                         gs.board[x][y] = 0;
-    //                     }
-
-    //                     target_x -= 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 }
 
 // Return the board state after merging tiles in the specified direction.
@@ -148,61 +84,6 @@ pub fn merge_tiles(gs: &mut BoardState, m: &Move) {
             }
         }
     }
-    // match m {
-    //     Move::Up => {
-    //         for x in 0..BOARD_SIZE {
-    //             for y in 0..BOARD_SIZE-1 {
-    //                 if gs.board[x][y] == 0 {
-    //                     continue;
-    //                 }
-    //                 if gs.board[x][y] == gs.board[x][y+1] {
-    //                     gs.board[x][y+1] = 0;
-    //                     gs.board[x][y] += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Down => {
-    //         for x in 0..BOARD_SIZE {
-    //             for y in (1..BOARD_SIZE).rev() {
-    //                 if gs.board[x][y] == 0 {
-    //                     continue;
-    //                 }
-    //                 if gs.board[x][y] == gs.board[x][y-1] {
-    //                     gs.board[x][y-1] = 0;
-    //                     gs.board[x][y] += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Left => {
-    //         for y in 0..BOARD_SIZE {
-    //             for x in 0..BOARD_SIZE-1 {
-    //                 if gs.board[x][y] == 0 {
-    //                     continue;
-    //                 }
-    //                 if gs.board[x][y] == gs.board[x+1][y] {
-    //                     gs.board[x+1][y] = 0;
-    //                     gs.board[x][y] += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     Move::Right => {
-    //         for y in 0..BOARD_SIZE {
-    //             for x in (1..BOARD_SIZE).rev() {
-    //                 if gs.board[x][y] == 0 {
-    //                     continue;
-    //                 }
-    //                 if gs.board[x][y] == gs.board[x-1][y] {
-    //                     gs.board[x-1][y] = 0;
-    //                     gs.board[x][y] += 1;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    //gs
 }
 
 // Return the state of the board after making the specified move.
@@ -211,9 +92,5 @@ pub fn after_move(mut gs: BoardState, m: &Move) -> BoardState {
     slide_tiles(&mut gs, m);
     merge_tiles(&mut gs, m);
     slide_tiles(&mut gs, m);
-
-    // gs = after_slide_tiles(gs, m);
-    // gs = after_merge_tiles(gs, m);
-    // gs = after_slide_tiles(gs, m);
     gs
 }
