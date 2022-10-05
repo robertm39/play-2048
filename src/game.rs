@@ -18,6 +18,26 @@ impl BoardState {
             board: b
         }
     }
+
+    // Return the tile value at the specified location.
+    pub fn get(&self, perp: usize, para: usize, m: &Move) -> u8 {
+        match m {
+            Move::Up => self.board[perp][para],
+            Move::Down => self.board[perp][BOARD_SIZE-para-1],
+            Move::Left => self.board[para][perp],
+            Move::Right => self.board[BOARD_SIZE-para-1][perp]
+        }
+    }
+
+    // Set the tile value at the specified location.
+    pub fn set(&mut self, perp: usize, para: usize, m: &Move, val: u8) {
+        match m {
+            Move::Up => self.board[perp][para] = val,
+            Move::Down => self.board[perp][BOARD_SIZE-para-1] = val,
+            Move::Left => self.board[para][perp] = val,
+            Move::Right => self.board[BOARD_SIZE-para-1][perp] = val
+        }
+    }
 }
 
 // The moves a player can make.
@@ -32,132 +52,156 @@ pub enum Move {
 // Return the state of the board after sliding the tiles in the specified direction.
 // Tested.
 pub fn slide_tiles(gs: &mut BoardState, m: &Move){
-    match m {
-        Move::Up => {
-            for x in 0..BOARD_SIZE {
-                let mut target_y = 0;
-                for y in 0..BOARD_SIZE {
-                    if gs.board[x][y] != 0 {
-                        if target_y != y {
-                            // Slide this tile down to the first empty spot
-                            gs.board[x][target_y] = gs.board[x][y];
-                            gs.board[x][y] = 0;
-                        }
-
-                        target_y += 1;
-                    }
+    for pe in 0..BOARD_SIZE {
+        let mut target_pr = 0;
+        for pr in 0..BOARD_SIZE {
+            if gs.get(pe, pr, m) != 0 {
+                if target_pr != pr {
+                    // Slide this tile to the first empty spot
+                    gs.set(pe, target_pr, m, gs.get(pe, pr, m));
+                    gs.set(pe, pr, m, 0);
                 }
-            }
-        }
-        Move::Down => {
-            for x in 0..BOARD_SIZE {
-                let mut target_y = BOARD_SIZE-1;
-                for y in (0..BOARD_SIZE).rev() {
-                    if gs.board[x][y] != 0 {
-                        if target_y != y {
-                            // Slide this tile down to the first empty spot
-                            gs.board[x][target_y] = gs.board[x][y];
-                            gs.board[x][y] = 0;
-                        }
 
-                        target_y -= 1;
-                    }
-                }
-            }
-        }
-        Move::Left => {
-            for y in 0..BOARD_SIZE {
-                let mut target_x = 0;
-                for x in 0..BOARD_SIZE {
-                    if gs.board[x][y] != 0 {
-                        if target_x != x {
-                            // Slide this tile down to the first empty spot
-                            gs.board[target_x][y] = gs.board[x][y];
-                            gs.board[x][y] = 0;
-                        }
-
-                        target_x += 1;
-                    }
-                }
-            }
-        }
-        Move::Right => {
-            for y in 0..BOARD_SIZE {
-                let mut target_x = BOARD_SIZE-1;
-                for x in (0..BOARD_SIZE).rev() {
-                    if gs.board[x][y] != 0 {
-                        if target_x != x {
-                            // Slide this tile down to the first empty spot
-                            gs.board[target_x][y] = gs.board[x][y];
-                            gs.board[x][y] = 0;
-                        }
-
-                        target_x -= 1;
-                    }
-                }
+                target_pr += 1;
             }
         }
     }
-    //gs
+    // match m {
+    //     Move::Up => {
+    //         for x in 0..BOARD_SIZE {
+    //             let mut target_y = 0;
+    //             for y in 0..BOARD_SIZE {
+    //                 if gs.board[x][y] != 0 {
+    //                     if target_y != y {
+    //                         // Slide this tile down to the first empty spot
+    //                         gs.board[x][target_y] = gs.board[x][y];
+    //                         gs.board[x][y] = 0;
+    //                     }
+
+    //                     target_y += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Down => {
+    //         for x in 0..BOARD_SIZE {
+    //             let mut target_y = BOARD_SIZE-1;
+    //             for y in (0..BOARD_SIZE).rev() {
+    //                 if gs.board[x][y] != 0 {
+    //                     if target_y != y {
+    //                         // Slide this tile down to the first empty spot
+    //                         gs.board[x][target_y] = gs.board[x][y];
+    //                         gs.board[x][y] = 0;
+    //                     }
+
+    //                     target_y -= 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Left => {
+    //         for y in 0..BOARD_SIZE {
+    //             let mut target_x = 0;
+    //             for x in 0..BOARD_SIZE {
+    //                 if gs.board[x][y] != 0 {
+    //                     if target_x != x {
+    //                         // Slide this tile down to the first empty spot
+    //                         gs.board[target_x][y] = gs.board[x][y];
+    //                         gs.board[x][y] = 0;
+    //                     }
+
+    //                     target_x += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Right => {
+    //         for y in 0..BOARD_SIZE {
+    //             let mut target_x = BOARD_SIZE-1;
+    //             for x in (0..BOARD_SIZE).rev() {
+    //                 if gs.board[x][y] != 0 {
+    //                     if target_x != x {
+    //                         // Slide this tile down to the first empty spot
+    //                         gs.board[target_x][y] = gs.board[x][y];
+    //                         gs.board[x][y] = 0;
+    //                     }
+
+    //                     target_x -= 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 // Return the board state after merging tiles in the specified direction.
 // Has been tested.
 pub fn merge_tiles(gs: &mut BoardState, m: &Move) {
-    match m {
-        Move::Up => {
-            for x in 0..BOARD_SIZE {
-                for y in 0..BOARD_SIZE-1 {
-                    if gs.board[x][y] == 0 {
-                        continue;
-                    }
-                    if gs.board[x][y] == gs.board[x][y+1] {
-                        gs.board[x][y+1] = 0;
-                        gs.board[x][y] += 1;
-                    }
-                }
+    for pe in 0..BOARD_SIZE {
+        for pr in 0..BOARD_SIZE-1 {
+            if gs.get(pe, pr, m) == 0 {
+                continue;
             }
-        }
-        Move::Down => {
-            for x in 0..BOARD_SIZE {
-                for y in (1..BOARD_SIZE).rev() {
-                    if gs.board[x][y] == 0 {
-                        continue;
-                    }
-                    if gs.board[x][y] == gs.board[x][y-1] {
-                        gs.board[x][y-1] = 0;
-                        gs.board[x][y] += 1;
-                    }
-                }
-            }
-        }
-        Move::Left => {
-            for y in 0..BOARD_SIZE {
-                for x in 0..BOARD_SIZE-1 {
-                    if gs.board[x][y] == 0 {
-                        continue;
-                    }
-                    if gs.board[x][y] == gs.board[x+1][y] {
-                        gs.board[x+1][y] = 0;
-                        gs.board[x][y] += 1;
-                    }
-                }
-            }
-        }
-        Move::Right => {
-            for y in 0..BOARD_SIZE {
-                for x in (1..BOARD_SIZE).rev() {
-                    if gs.board[x][y] == 0 {
-                        continue;
-                    }
-                    if gs.board[x][y] == gs.board[x-1][y] {
-                        gs.board[x-1][y] = 0;
-                        gs.board[x][y] += 1;
-                    }
-                }
+            if gs.get(pe, pr, m) == gs.get(pe, pr+1, m) {
+                gs.set(pe, pr+1, m, 0);
+                gs.set(pe, pr, m, gs.get(pe, pr, m) + 1);
             }
         }
     }
+    // match m {
+    //     Move::Up => {
+    //         for x in 0..BOARD_SIZE {
+    //             for y in 0..BOARD_SIZE-1 {
+    //                 if gs.board[x][y] == 0 {
+    //                     continue;
+    //                 }
+    //                 if gs.board[x][y] == gs.board[x][y+1] {
+    //                     gs.board[x][y+1] = 0;
+    //                     gs.board[x][y] += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Down => {
+    //         for x in 0..BOARD_SIZE {
+    //             for y in (1..BOARD_SIZE).rev() {
+    //                 if gs.board[x][y] == 0 {
+    //                     continue;
+    //                 }
+    //                 if gs.board[x][y] == gs.board[x][y-1] {
+    //                     gs.board[x][y-1] = 0;
+    //                     gs.board[x][y] += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Left => {
+    //         for y in 0..BOARD_SIZE {
+    //             for x in 0..BOARD_SIZE-1 {
+    //                 if gs.board[x][y] == 0 {
+    //                     continue;
+    //                 }
+    //                 if gs.board[x][y] == gs.board[x+1][y] {
+    //                     gs.board[x+1][y] = 0;
+    //                     gs.board[x][y] += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     Move::Right => {
+    //         for y in 0..BOARD_SIZE {
+    //             for x in (1..BOARD_SIZE).rev() {
+    //                 if gs.board[x][y] == 0 {
+    //                     continue;
+    //                 }
+    //                 if gs.board[x][y] == gs.board[x-1][y] {
+    //                     gs.board[x-1][y] = 0;
+    //                     gs.board[x][y] += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     //gs
 }
 
@@ -167,6 +211,7 @@ pub fn after_move(mut gs: BoardState, m: &Move) -> BoardState {
     slide_tiles(&mut gs, m);
     merge_tiles(&mut gs, m);
     slide_tiles(&mut gs, m);
+
     // gs = after_slide_tiles(gs, m);
     // gs = after_merge_tiles(gs, m);
     // gs = after_slide_tiles(gs, m);

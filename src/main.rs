@@ -9,7 +9,7 @@ mod prelude {
 use prelude::*;
 
 fn main() {
-    let board = BoardState::new([[1, 0, 3, 0], [1, 0, 3, 0], [0, 0, 3, 0], [0, 0, 3, 0]]);
+    let board = BoardState::new([[1, 0, 0, 1], [0, 3, 3, 0], [1, 1, 1, 1], [0, 0, 0, 0]]);
     println!("{:?}", board);
-    println!("{:?}", after_move(board, &Move::Left));
+    println!("{:?}", after_move(board, &Move::Up));
 }
