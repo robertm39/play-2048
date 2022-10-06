@@ -41,5 +41,5 @@ pub fn min_score(scores: &Vec<WeightedScore>) -> f64{
 
 // Returns a combination of the minimum and the mean scores.
 pub fn comb_score(scores: &Vec<WeightedScore>) -> f64 {
-    return (mean_score(scores) + min_score(scores)) / 2.0;
+    (mean_score(scores) + min_score(scores)) / 2.0
 }

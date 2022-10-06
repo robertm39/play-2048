@@ -60,7 +60,7 @@ pub fn num_connected_tiles(board: &BoardState) -> f64 {
 }
 
 // A score that sees whether the highest tile is in the corner, or maybe on the edge.
-pub fn highest_in_corner_score(board: &BoardState) -> f64 {
+pub fn highest_in_corner_or_edge_score(board: &BoardState) -> f64 {
     let scale = 4.0;
 
     let mut score = 0.0;
@@ -102,5 +102,46 @@ pub fn highest_in_corner_score(board: &BoardState) -> f64 {
 }
 
 pub fn smarter_score(board: &BoardState) -> f64 {
-    num_tiles(board) + num_connected_tiles(board) + highest_in_corner_score(board)
+    num_tiles(board) + num_connected_tiles(board) + highest_in_corner_or_edge_score(board)
+}
+
+// A function multiplied by a weight.
+pub struct WeightedFunc {
+    score_func: fn(&BoardState) -> f64,
+    weight: f64,
+}
+
+impl WeightedFunc {
+    pub fn new(score_func: fn(&BoardState) -> f64, weight: f64) -> Self {
+        Self {
+            score_func,
+            weight
+        }
+    }
+
+    pub fn get_score(&self, board: &BoardState) -> f64 {
+        self.weight * (self.score_func)(board)
+    }
+}
+
+// The sum of many functions.
+pub struct ManyFuncs {
+    funcs: Vec<fn(&BoardState) -> f64>
+}
+
+impl ManyFuncs {
+    pub fn new(funcs: Vec<fn(&BoardState) -> f64>) -> Self {
+        Self {
+            funcs
+        }
+    }
+
+    // Return the sum of all the scores
+    pub fn get_score(&self, board: &BoardState) -> f64 {
+        let mut total = 0.0;
+        for func in &self.funcs {
+            total += func(board);
+        }
+        total
+    }
 }

@@ -3,9 +3,16 @@ use std::time::Instant;
 
 const MILLISECONDS_PER_MOVE: u128 = 100;
 
-pub fn play_2048(mut board: BoardState, config: &ScoreConfig, _: u32, board_handler: fn(&BoardState) -> ()) {
+pub fn play_2048<S, P, G>(mut board: BoardState, config: &ScoreConfig<S, P, G>, _: u32, board_handler: fn(&BoardState) -> ())
+where
+    S: Fn(&BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
     loop {
+        //println!();
         board_handler(&board);
+        println!();
 
         // Choose the best move, if there is any
         let mut chosen_move: Option<Move> = None;
@@ -18,14 +25,14 @@ pub fn play_2048(mut board: BoardState, config: &ScoreConfig, _: u32, board_hand
                 let now = Instant::now();
                 let mut score = 0.0;
                 let mut dp = 0;
-                for d in 0..=100 {
+                for d in 2..=100 {
                     dp = d;
                     score = game_side_score(&am, config, d);
                     if now.elapsed().as_millis() >= MILLISECONDS_PER_MOVE {
                         break;
                     }
                 }
-                println!("{}", dp);
+                print!("{} ", dp);
 
                 match chosen_move {
                     Some(_) => {
@@ -46,6 +53,8 @@ pub fn play_2048(mut board: BoardState, config: &ScoreConfig, _: u32, board_hand
             Some(d) => {
                 board = after_move(board, &d);
                 board = after_tile_spawn(board);
+                println!();
+                println!("{:?}", d);
             }
             None => {break;}
         }

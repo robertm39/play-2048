@@ -21,21 +21,14 @@ mod prelude {
 use prelude::*;
 
 fn main() {
-    let board = BoardState::new([[1, 0, 1, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]);
+    let mut board = BoardState::new([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]);
+    board = after_tile_spawn(board);
+    board = after_tile_spawn(board);
 
-    // for _ in 0..10 {
-    //     let b = after_tile_spawn(board);
-    //     b.compact_print();
-    // }
+    // let weighted_tile_sum = WeightedFunc::new(num_tiles, 1.0);
 
     let config = ScoreConfig::new(smarter_score, -100.0, max_score, comb_score);
+    // let config = ScoreConfig::new(weighted_tile_sum.get_score, -100.0, max_score, comb_score);
 
     play_2048(board, &config, 2, |b: &BoardState| {b.compact_print()});
-
-    // for depth in 0..=3 {
-    //     // let score = player_side_score(&board, |_: &BoardState| -> f64 {0.0}, 0.0, depth);
-    //     let score = player_side_score(&board, &config, depth);
-    //     println!("{}: {}", depth, score);
-    // }
-    // println!("{:?}", after_move(board, &Move::Right));
 }

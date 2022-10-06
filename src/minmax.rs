@@ -16,19 +16,29 @@ impl WeightedScore {
 }
 
 // Info for determining the score of a board.
-pub struct ScoreConfig {
-    score_func: fn(&BoardState) -> f64,
+pub struct ScoreConfig<S, P, G> 
+where
+    S: Fn(&BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
+    score_func: S,//fn(&BoardState) -> f64,
     dead_score: f64,
-    player_agg: fn(&Vec<f64>) -> f64,
-    game_agg: fn(&Vec<WeightedScore>) -> f64,
+    player_agg: P,//fn(&Vec<f64>) -> f64,
+    game_agg: G,//fn(&Vec<WeightedScore>) -> f64,
 }
 
-impl ScoreConfig {
+impl<S, P, G> ScoreConfig<S, P, G>
+where
+    S: Fn(&BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
     pub fn new(
-        score_func: fn(&BoardState) -> f64,
+        score_func: S,
         dead_score: f64,
-        player_agg: fn(&Vec<f64>) -> f64,
-        game_agg: fn(&Vec<WeightedScore>) -> f64,) -> Self {
+        player_agg: P,
+        game_agg: G,) -> Self {
         
         Self {
             score_func,
@@ -41,7 +51,12 @@ impl ScoreConfig {
 
 // Return the score, assuming that it is the game's turn.
 // Uses the provided score function when it bottoms out.
-pub fn game_side_score(gs: &BoardState, score_config: &ScoreConfig, depth: u32) -> f64 {
+pub fn game_side_score<S, P, G>(gs: &BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
+where
+    S: Fn(&BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
     let mut scores = Vec::new();
     for x in 0..BOARD_SIZE {
         for y in 0..BOARD_SIZE {
@@ -67,7 +82,12 @@ pub fn game_side_score(gs: &BoardState, score_config: &ScoreConfig, depth: u32) 
 
 // Return the score, assuming that it is the player's turn.
 // Uses the provided score function when it bottoms out.
-pub fn player_side_score(gs: &BoardState, score_config: &ScoreConfig, depth: u32) -> f64 {
+pub fn player_side_score<S, P, G>(gs: &BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
+where
+    S: Fn(&BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
     // We've bottomed out.
     if depth == 0 {
         return (score_config.score_func)(gs);
