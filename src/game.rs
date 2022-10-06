@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 use std::char;
+use rand::prelude::*;
 
 pub const BOARD_SIZE: usize = 4;
 
@@ -116,5 +117,37 @@ pub fn after_move(mut gs: BoardState, m: &Move) -> BoardState {
     slide_tiles(&mut gs, m);
     merge_tiles(&mut gs, m);
     slide_tiles(&mut gs, m);
+    gs
+}
+
+// Return the board after spawning a random tile.
+pub fn after_tile_spawn(mut gs: BoardState) -> BoardState {
+    let mut rng = thread_rng();
+    let tile = if rng.gen_range(0.0..1.0) < 0.9 {1} else {2};
+
+    let mut num_open_tiles = 0;
+    for x in 0..BOARD_SIZE {
+        for y in 0..BOARD_SIZE {
+            if gs.board[x][y] == 0 {
+                num_open_tiles += 1;
+            }
+        }
+    }
+
+    let chosen_position = rng.gen_range(0..num_open_tiles);
+    let mut cur_index = 0;
+    for x in 0..BOARD_SIZE {
+        for y in 0..BOARD_SIZE {
+            if gs.board[x][y] != 0 {
+                continue;
+            }
+            if cur_index == chosen_position {
+                gs.board[x][y] = tile;
+                return gs;
+            }
+            cur_index += 1;
+        }
+    }
+
     gs
 }
