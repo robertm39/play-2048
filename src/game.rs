@@ -1,6 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 
 use crate::prelude::*;
+use std::char;
 
 pub const BOARD_SIZE: usize = 4;
 
@@ -39,6 +40,29 @@ impl BoardState {
             Move::Left => self.board[para][perp] = val,
             Move::Right => self.board[BOARD_SIZE-para-1][perp] = val
         }
+    }
+
+    pub fn compact_print(&self) {
+        println!("+----+");
+        for y in 0..BOARD_SIZE {
+            let mut line = String::from("");
+            for x in 0..BOARD_SIZE {
+                let tile = self.board[x][y];
+
+                if tile == 0 { 
+                    line.push(' ');
+                } else {
+                    match char::from_digit(tile.into(), 36) {
+                        Some(c) => {
+                            line.push(c);
+                        },
+                        None => {}
+                    }
+                }
+            }
+            println!("|{}|", line);
+        }
+        println!("+----+");
     }
 }
 
