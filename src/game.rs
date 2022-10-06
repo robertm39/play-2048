@@ -13,13 +13,24 @@ pub const BOARD_SIZE: usize = 4;
 // This is enough to hold all tiles obtainable in a normal 2048 game.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct BoardState {
-    pub board: [[u8;BOARD_SIZE];BOARD_SIZE]
+    pub board: [[u8;BOARD_SIZE];BOARD_SIZE],
+    highest_tile: Option<u8>,
 }
 
 impl BoardState {
-    pub fn new(b: [[u8;4];4]) -> Self {
+    pub fn new(b: [[u8;BOARD_SIZE];BOARD_SIZE]) -> Self {
+        // for x in 0..BOARD_SIZE {
+        //     for y in 0..BOARD_SIZE {
+        //         let tile = b[x][y];
+        //         if tile > highest {
+        //             highest = tile;
+        //         }
+        //     }
+        // }
+        
         Self {
-            board: b
+            board: b,
+            highest_tile: None,
         }
     }
 
@@ -33,16 +44,61 @@ impl BoardState {
         }
     }
 
+
+    
     // Set the tile value at the specified location.
     pub fn set(&mut self, perp: usize, para: usize, m: &Move, val: u8) {
+        // match self.highest_tile {
+        //     Some(h) => {
+        //         if val > h {
+        //             self.highest_tile = Some(val);
+        //         }
+        //     }
+        //     None => {}
+        // }
+
         match m {
-            Move::Up => self.board[perp][para] = val,
-            Move::Down => self.board[perp][BOARD_SIZE-para-1] = val,
-            Move::Left => self.board[para][perp] = val,
-            Move::Right => self.board[BOARD_SIZE-para-1][perp] = val
+            // Move::Up => self.board[perp][para] = val,
+            Move::Up => self.normal_set(perp, para, val),
+            Move::Down => self.normal_set(perp, BOARD_SIZE-para-1, val),
+            Move::Left => self.normal_set(para, perp, val),
+            Move::Right => self.normal_set(BOARD_SIZE-para-1, perp, val),
         }
     }
 
+    // You'd better not overwrite the highest tile
+    pub fn normal_set(&mut self, x: usize, y: usize, val: u8) {
+        match self.highest_tile {
+            Some(h) => {
+                if val > h {
+                    self.highest_tile = Some(val);
+                }
+            }
+            None => {}
+        }
+        self.board[x][y] = val;
+    }
+
+    pub fn get_highest_tile(&mut self) -> u8 {
+        match self.highest_tile {
+            Some(h) => h,
+            None => {
+                let mut highest: u8 = 0;
+                for col in self.board {
+                    for val in col {
+                        if val > highest {
+                            highest = val;
+                        }
+                    }
+                }
+                self.highest_tile = Some(highest);
+                highest
+            }
+        }
+        
+    }
+
+    // Print the board in a compact 6x6 square.
     pub fn compact_print(&self) {
         println!("┌────┐");
         for y in 0..BOARD_SIZE {
@@ -142,7 +198,8 @@ pub fn after_tile_spawn(mut gs: BoardState) -> BoardState {
                 continue;
             }
             if cur_index == chosen_position {
-                gs.board[x][y] = tile;
+                // gs.board[x][y] = tile;
+                gs.normal_set(x, y, tile);
                 return gs;
             }
             cur_index += 1;

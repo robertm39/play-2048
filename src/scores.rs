@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 // A score that prefers boards with fewer tiles.
-pub fn num_tiles(board: &BoardState) -> f64 {
+pub fn num_tiles(board: &mut BoardState) -> f64 {
     let mut num = 0.0;
     for x in 0..BOARD_SIZE {
         for y in 0..BOARD_SIZE {
@@ -15,7 +15,7 @@ pub fn num_tiles(board: &BoardState) -> f64 {
 }
 
 // A score that likes it when tiles are next to same or similar tiles.
-pub fn num_connected_tiles(board: &BoardState) -> f64 {
+pub fn num_connected_tiles(board: &mut BoardState) -> f64 {
     let mut score = 0.0;
 
     for x in 0..BOARD_SIZE {
@@ -60,7 +60,7 @@ pub fn num_connected_tiles(board: &BoardState) -> f64 {
 }
 
 // A score that sees whether the highest tile is in the corner, or maybe on the edge.
-pub fn highest_in_corner_or_edge_score(board: &BoardState) -> f64 {
+pub fn highest_in_corner_or_edge_score(board: &mut BoardState) -> f64 {
     let scale = 4.0;
 
     let mut score = 0.0;
@@ -101,25 +101,58 @@ pub fn highest_in_corner_or_edge_score(board: &BoardState) -> f64 {
     score
 }
 
-pub fn smarter_score(board: &BoardState) -> f64 {
+// A score that sees if the highest tile is in the corner.
+pub fn highest_tile_in_corner_score(board: &mut BoardState) -> f64 {
+    if board.get_highest_tile() <= 2 {
+        return 0.0;
+    }
+
+    for x in [0, BOARD_SIZE - 1] {
+        for y in [0, BOARD_SIZE - 1] {
+            if board.board[x][y] == board.get_highest_tile() {
+                return 1.0;
+            }
+        }
+    }
+    0.0
+}
+
+// A score that sees if there are tiles equal to the highest tile in the center.
+pub fn highest_tile_in_center_score(board: &mut BoardState) -> f64 {
+    if board.get_highest_tile() <= 2 {
+        return 0.0;
+    }
+
+    let mut total = 0.0;
+    for x in 1..BOARD_SIZE-1 {
+        for y in 1..BOARD_SIZE-1 {
+            if board.board[x][y] == board.get_highest_tile() {
+                total -= 1.0;
+            }
+        }
+    }
+    total
+}
+
+pub fn smarter_score(board: &mut BoardState) -> f64 {
     num_tiles(board) + num_connected_tiles(board) + highest_in_corner_or_edge_score(board)
 }
 
 // A function multiplied by a weight.
 pub struct WeightedFunc {
-    score_func: fn(&BoardState) -> f64,
+    score_func: fn(&mut BoardState) -> f64,
     weight: f64,
 }
 
 impl WeightedFunc {
-    pub fn new(score_func: fn(&BoardState) -> f64, weight: f64) -> Self {
+    pub fn new(score_func: fn(&mut BoardState) -> f64, weight: f64) -> Self {
         Self {
             score_func,
             weight
         }
     }
 
-    pub fn get_score(&self, board: &BoardState) -> f64 {
+    pub fn get_score(&self, board: &mut BoardState) -> f64 {
         self.weight * (self.score_func)(board)
     }
 }

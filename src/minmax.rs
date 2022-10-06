@@ -18,19 +18,19 @@ impl WeightedScore {
 // Info for determining the score of a board.
 pub struct ScoreConfig<S, P, G> 
 where
-    S: Fn(&BoardState) -> f64,
+    S: Fn(&mut BoardState) -> f64,
     P: Fn(&Vec<f64>) -> f64,
     G: Fn(&Vec<WeightedScore>) -> f64,
 {
-    score_func: S,//fn(&BoardState) -> f64,
-    dead_score: f64,
-    player_agg: P,//fn(&Vec<f64>) -> f64,
-    game_agg: G,//fn(&Vec<WeightedScore>) -> f64,
+    pub score_func: S,//fn(&BoardState) -> f64,
+    pub dead_score: f64,
+    pub player_agg: P,//fn(&Vec<f64>) -> f64,
+    pub game_agg: G,//fn(&Vec<WeightedScore>) -> f64,
 }
 
 impl<S, P, G> ScoreConfig<S, P, G>
 where
-    S: Fn(&BoardState) -> f64,
+    S: Fn(&mut BoardState) -> f64,
     P: Fn(&Vec<f64>) -> f64,
     G: Fn(&Vec<WeightedScore>) -> f64,
 {
@@ -51,9 +51,9 @@ where
 
 // Return the score, assuming that it is the game's turn.
 // Uses the provided score function when it bottoms out.
-pub fn game_side_score<S, P, G>(gs: &BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
+pub fn game_side_score<S, P, G>(gs: &mut BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
 where
-    S: Fn(&BoardState) -> f64,
+    S: Fn(&mut BoardState) -> f64,
     P: Fn(&Vec<f64>) -> f64,
     G: Fn(&Vec<WeightedScore>) -> f64,
 {
@@ -67,7 +67,7 @@ where
             for val in 1..=2 {
                 let mut after_tile = *gs;
                 after_tile.board[x][y] = val;
-                let score = player_side_score(&after_tile, score_config, depth);
+                let score = player_side_score(&mut after_tile, score_config, depth);
                 scores.push(WeightedScore::new(score, if val==1 {0.9} else {0.1}));
             }
         }
@@ -82,9 +82,9 @@ where
 
 // Return the score, assuming that it is the player's turn.
 // Uses the provided score function when it bottoms out.
-pub fn player_side_score<S, P, G>(gs: &BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
+pub fn player_side_score<S, P, G>(gs: &mut BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> f64
 where
-    S: Fn(&BoardState) -> f64,
+    S: Fn(&mut BoardState) -> f64,
     P: Fn(&Vec<f64>) -> f64,
     G: Fn(&Vec<WeightedScore>) -> f64,
 {
@@ -95,9 +95,9 @@ where
 
     let mut scores = Vec::new();
     for m in Move::iter() {
-        let am = after_move(*gs, &m);
+        let mut am = after_move(*gs, &m);
         if am != *gs {
-            scores.push(game_side_score(&am, score_config, depth-1));
+            scores.push(game_side_score(&mut am, score_config, depth-1));
         }
     }
 
