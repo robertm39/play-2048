@@ -44,7 +44,7 @@ impl BoardState {
     }
 
     pub fn compact_print(&self) {
-        println!("+----+");
+        println!("┌────┐");
         for y in 0..BOARD_SIZE {
             let mut line = String::from("");
             for x in 0..BOARD_SIZE {
@@ -61,9 +61,9 @@ impl BoardState {
                     }
                 }
             }
-            println!("|{}|", line);
+            println!("│{}│", line);
         }
-        println!("+----+");
+        println!("└────┘");
     }
 }
 
