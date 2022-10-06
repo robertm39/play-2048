@@ -49,9 +49,9 @@ pub fn num_connected_tiles(board: &BoardState) -> f64 {
             }
 
             if has_same {
-                score += 0.8;
+                score += 0.7;
             } else if has_close {
-                score += 0.6;
+                score += 0.4;
             }
         }
     }
@@ -59,6 +59,48 @@ pub fn num_connected_tiles(board: &BoardState) -> f64 {
     score
 }
 
+// A score that sees whether the highest tile is in the corner, or maybe on the edge.
+pub fn highest_in_corner_score(board: &BoardState) -> f64 {
+    let scale = 4.0;
+
+    let mut score = 0.0;
+
+    let mut highest = 1;
+    let mut highest_in_corner = false;
+    for x in 0..BOARD_SIZE {
+        for y in 0..BOARD_SIZE {
+            let x_ext = x == 0 || x == BOARD_SIZE - 1;
+            let y_ext = y == 0 || y == BOARD_SIZE - 1;
+
+            let is_corner = x_ext && y_ext;
+            let in_center = !(x_ext || y_ext);
+
+            let tile = board.board[x][y];
+            if tile > highest {
+                highest_in_corner = false;
+                score = 0.0;
+                highest = tile;
+            }
+            if tile >= highest {
+                highest_in_corner |= is_corner;
+                if in_center {
+                    score -= scale;
+                }
+            }
+        }
+    }
+
+    if highest_in_corner {
+        score += scale;
+    }
+
+    if highest <= 2 {
+        score = 0.0;
+    }
+
+    score
+}
+
 pub fn smarter_score(board: &BoardState) -> f64 {
-    return num_tiles(board) + num_connected_tiles(board);
+    num_tiles(board) + num_connected_tiles(board) + highest_in_corner_score(board)
 }

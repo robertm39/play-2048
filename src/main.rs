@@ -28,7 +28,7 @@ fn main() {
     //     b.compact_print();
     // }
 
-    let config = ScoreConfig::new(smarter_score, -100.0, max_score, mean_score);
+    let config = ScoreConfig::new(smarter_score, -100.0, max_score, comb_score);
 
     play_2048(board, &config, 2, |b: &BoardState| {b.compact_print()});
 
