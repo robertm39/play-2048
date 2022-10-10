@@ -1,9 +1,9 @@
 use crate::prelude::*;
 use std::time::Instant;
 
-const MILLISECONDS_PER_MOVE: u128 = 10;
+// const MILLISECONDS_PER_MOVE: u128 = 20;
 
-pub fn play_2048<S, P, G>(mut board: BoardState, config: &ScoreConfig<S, P, G>, _: u32, board_handler: fn(&BoardState) -> ())
+pub fn play_2048<S, P, G>(mut board: BoardState, config: &ScoreConfig<S, P, G>, _: u32, board_handler: fn(&BoardState) -> ()) -> BoardState
 where
     S: Fn(&mut BoardState) -> f64,
     P: Fn(&Vec<f64>) -> f64,
@@ -12,9 +12,9 @@ where
     loop {
         //println!();
         board_handler(&board);
-        println!("{}", (config.score_func)(&mut board));
+        // println!("{}", (config.score_func)(&mut board));
         // println!("{}", board.get_highest_tile());
-        println!();
+        // println!();
 
         // Choose the best move, if there is any
         let mut chosen_move: Option<Move> = None;
@@ -23,18 +23,25 @@ where
             let mut am = after_move(board, &m);
             if am != board {
 
+                // Just go one level deep to keep things fast
+                let score = game_side_score(&mut am, config, 1);
+                
+                // // Enough for at least one move and two moves after it
+                // let score = mw_game_side_score(&mut am, config, 32 * 4 * 32 * 4 * 32).unwrap();
+
                 // Keep computing scores at higher depth until enough time has passed
-                let now = Instant::now();
-                let mut score = 0.0;
-                let mut dp = 0;
-                for d in 2..=100 {
-                    dp = d;
-                    score = game_side_score(&mut am, config, d);
-                    if now.elapsed().as_millis() >= MILLISECONDS_PER_MOVE {
-                        break;
-                    }
-                }
-                print!("{} ", dp);
+                // let now = Instant::now();
+                // let mut score = 0.0;
+                // let mut dp = 0;
+                // for d in 2..=100 {
+                // for d in [0] {
+                    // dp = d;
+                // score = game_side_score(&mut am, config, d);
+                // if now.elapsed().as_millis() >= MILLISECONDS_PER_MOVE {
+                //     break;
+                // }
+                // }
+                // print!("{} ", dp);
 
                 match chosen_move {
                     Some(_) => {
@@ -55,11 +62,12 @@ where
             Some(d) => {
                 board = after_move(board, &d);
                 board = after_tile_spawn(board);
-                println!();
-                println!("{:?}", d);
+                // println!();
+                // println!("{:?}", d);
             }
             None => {break;}
         }
     }
-    println!("The game is over.");
+    // println!("The game is over.");
+    board
 }

@@ -79,23 +79,45 @@ impl BoardState {
         self.board[x][y] = val;
     }
 
-    pub fn get_highest_tile(&mut self) -> u8 {
-        match self.highest_tile {
-            Some(h) => h,
-            None => {
-                let mut highest: u8 = 0;
-                for col in self.board {
-                    for val in col {
-                        if val > highest {
-                            highest = val;
-                        }
-                    }
+    pub fn get_highest_tile(&self) -> u8 {
+        let mut highest: u8 = 0;
+        for col in self.board {
+            for val in col {
+                if val > highest {
+                    highest = val;
                 }
-                self.highest_tile = Some(highest);
-                highest
             }
         }
+        highest
+        // match self.highest_tile {
+        //     Some(h) => h,
+        //     None => {
+        //         let mut highest: u8 = 0;
+        //         for col in self.board {
+        //             for val in col {
+        //                 if val > highest {
+        //                     highest = val;
+        //                 }
+        //             }
+        //         }
+        //         self.highest_tile = Some(highest);
+        //         highest
+        //     }
+        // }
         
+    }
+
+    pub fn total_tiles(&self) -> u32 {
+        let mut total: u32 = 0;
+        let base: u32 = 2;
+        for col in self.board {
+            for val in col {
+                if val > 0 {
+                    total += base.pow(val.into());
+                }
+            }
+        }
+        total
     }
 
     // Print the board in a compact 6x6 square.
