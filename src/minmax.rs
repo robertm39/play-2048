@@ -105,20 +105,86 @@ where
         score_config.dead_score
     } else {
         (score_config.player_agg)(&scores)
-        // let mut max_score = scores[0];
-        // for score in scores {
-        //     if score > max_score {
-        //         max_score = score;
-        //     }
-        // }
-        // max_score
     }
 }
 
 // each new tile supposedly has a 9 in 10 chance if being a 2
 // this is also roughly what I observe
 
+// Represents the calculated score and the number of possibilities considered.
+pub struct ScoreAndWidth {
+    pub score: f64,
+    pub width: u32,
+}
 
+impl ScoreAndWidth {
+    fn new(score: f64, width: u32) -> Self {
+        Self {
+            score,
+            width,
+        }
+    }
+}
+
+pub fn rw_player_side_score<S, P, G>(gs: &mut BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> ScoreAndWidth
+where
+    S: Fn(&mut BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
+    // We've bottomed out.
+    if depth == 0 {
+        return ScoreAndWidth::new((score_config.score_func)(gs), 1);
+    }
+
+    let mut scores = Vec::new();
+    let mut width = 0;
+    for m in Move::iter() {
+        let mut am = after_move(*gs, &m);
+        if am != *gs {
+            let score = rw_game_side_score(&mut am, score_config, depth-1);
+            width += score.width;
+            scores.push(score.score);
+        }
+    }
+
+    if scores.is_empty() {
+        ScoreAndWidth::new(score_config.dead_score, 1)
+    } else {
+        ScoreAndWidth::new((score_config.player_agg)(&scores), width)
+    }
+}
+
+pub fn rw_game_side_score<S, P, G>(gs: &mut BoardState, score_config: &ScoreConfig<S, P, G>, depth: u32) -> ScoreAndWidth
+where
+    S: Fn(&mut BoardState) -> f64,
+    P: Fn(&Vec<f64>) -> f64,
+    G: Fn(&Vec<WeightedScore>) -> f64,
+{
+    let mut scores = Vec::new();
+    let mut width = 0;
+    for x in 0..BOARD_SIZE {
+        for y in 0..BOARD_SIZE {
+            if gs.board[x][y] != 0 {
+                continue;
+            }
+
+            for val in 1..=2 {
+                let mut after_tile = *gs;
+                after_tile.board[x][y] = val;
+                let score = rw_player_side_score(&mut after_tile, score_config, depth);
+                width += score.width;
+                scores.push(WeightedScore::new(score.score, if val==1 {0.9} else {0.1}));
+            }
+        }
+    }
+
+    if scores.is_empty() {
+        ScoreAndWidth::new(score_config.dead_score, 1)
+    } else {
+        ScoreAndWidth::new((score_config.game_agg)(&scores), width)
+    }
+}
 
 // Minmax functions that have a maximum width rather than a number of iterations
 pub fn mw_game_side_score<S, P, G>(gs: &mut BoardState, score_config: &ScoreConfig<S, P, G>, width: u32) -> Option<f64>
