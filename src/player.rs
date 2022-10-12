@@ -5,7 +5,7 @@ use crate::prelude::*;
 
 const ONE_LEVEL: u32 = 32*4;
 
-const TARGET_WIDTH: u32 = ONE_LEVEL;
+const TARGET_WIDTH: u32 = ONE_LEVEL * ONE_LEVEL;
 
 pub fn play_2048<S, P, G>(mut board: BoardState, config: &ScoreConfig<S, P, G>, _: u32, board_handler: fn(&BoardState) -> ()) -> BoardState
 where
@@ -27,10 +27,11 @@ where
             let mut am = after_move(board, &m);
             if am != board {
 
+                // The target-width method
                 let mut score = 0.0;
                 // Go for a certain width
                 // let mut d = 0;
-                for depth in 1..=100 {
+                for depth in 2..=100 {
                     // d = depth;
                     let score_and_width = rw_game_side_score(&mut am, config, depth);
                     score = score_and_width.score;
@@ -38,6 +39,10 @@ where
                         break;
                     }
                 }
+
+                // // The max-width method (not very good)
+                // let score = mw_game_side_score(&mut am, config, TARGET_WIDTH).unwrap();
+
                 // print!("{} ", d);
 
                 // // Just go a constant number of levels deep
