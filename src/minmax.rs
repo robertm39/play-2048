@@ -272,7 +272,7 @@ where
 
     let mut scores = Vec::new();
     for dir in poss_moves {
-        let after = after_move(*gs, &dir);
+        let mut after = after_move(*gs, &dir);
         let mut num_poss = poss_per;
         if extra > 0 {
             num_poss += 1;
@@ -281,7 +281,7 @@ where
 
         // If we have enough possibilities to explore all responses, get that score
         // Otherwise, just use the flat score
-        if let Some(score) = mw_game_side_score(gs, score_config, num_poss) {
+        if let Some(score) = mw_game_side_score(&after, score_config, num_poss) {
             scores.push(score);
         } else {
             return (score_config.score_func)(gs);

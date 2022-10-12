@@ -89,8 +89,6 @@ fn plain_run() {
         corner_weight * highest_tile_in_corner_score(b) +
         center_weight * highest_tile_in_center_score(b) +
         adjacent_tiles_score(b, emp_non_adj, emp_adj, sur_non_adj, sur_adj)
-        // w_highest_corner.get_score(b)// + 
-        //w_highest_center.get_score(b)
     };
 
     let comb = |b: &Vec<WeightedScore>| -> f64 {
@@ -110,8 +108,8 @@ fn plain_run() {
 // min_weight: 0.6, I guess, but it doesn't seem to make a big difference
 // 
 // num_tiles is fixed at 1.0
-// corner_weight: 1.0625
-// center_weight: 0.5
+// corner_weight: 0.5 (was 1.0625)
+// center_weight: 1.3125 (was 0.5)
 // 
 // emp_non_adj: -0.5
 // sur_non_adj: -0.5625
@@ -123,10 +121,10 @@ const TRIALS_PER_VALUE: u32 = 1024;
 fn trials_run() {
     let min_weight = 0.6;
 
-    let mut corner_weight = 0.0; //1.0625
-    let center_weight = 0.5;
+    let corner_weight = 0.5;
+    let center_weight = 1.3125;
 
-    let emp_non_adj = -0.5; 
+    let mut emp_non_adj = -1.0; //-0.5
     let sur_non_adj = -0.5625;
 
     let sur_adj = 0.0;
@@ -143,45 +141,28 @@ fn trials_run() {
             board = after_tile_spawn(board);
             board = after_tile_spawn(board);
 
-            //let w_tile_sum = WeightedFunc::new(num_tiles, 1.0);
-            //let w_highest_corner = WeightedFunc::new(highest_tile_in_corner_score, corner_weight);
-            //let w_highest_center = WeightedFunc::new(highest_tile_in_center_score, 0.0);
-
             let score = |b: &mut BoardState| -> f64 {
                 num_tiles(b) +
                 corner_weight * highest_tile_in_corner_score(b) +
                 center_weight * highest_tile_in_center_score(b) +
                 adjacent_tiles_score(b, emp_non_adj, emp_adj, sur_non_adj, sur_adj)
-                // w_highest_corner.get_score(b)// + 
-                //w_highest_center.get_score(b)
             };
-
-            // println!("{}", score(&board));
 
             let comb = |b: &Vec<WeightedScore>| -> f64 {
                 min_weight * min_score(b) + (1.0-min_weight) * mean_score(b)
             };
 
-            // let config = ScoreConfig::new(smarter_score, -100.0, max_score, comb_score);
             let config = ScoreConfig::new(score, dead_score, max_score, comb);
 
             let end_board = play_2048(board, &config, 2, |_: &BoardState| {});
-            // let base: u32 = 2;
 
             total_score += f64::from(end_board.total_tiles());
-            // println!("{}\t{}\t{}", corner_weight, end_board.total_tiles(), base.pow(end_board.get_highest_tile().into()));
         }
 
         let av_score: f64 = total_score / f64::from(TRIALS_PER_VALUE);
-        println!("{}\t{}", corner_weight, av_score);
+        println!("{}\t{}", emp_non_adj, av_score);
 
-        // corner_weight += 1.0/64.0;
-        // min_weight += 1.0/64.0;
-        // center_weight += 1.0/8.0;
-        // same_adj_weight += 1.0/8.0;
-        // dead_score -= 5.0;
-        // sur_non_adj += 1.0/32.0;
-        corner_weight += 1.0/8.0;
+        emp_non_adj += 1.0/32.0;
 
     }
 }

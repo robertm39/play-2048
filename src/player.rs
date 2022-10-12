@@ -29,9 +29,9 @@ where
 
                 let mut score = 0.0;
                 // Go for a certain width
-                let mut d = 0;
+                // let mut d = 0;
                 for depth in 1..=100 {
-                    d = depth;
+                    // d = depth;
                     let score_and_width = rw_game_side_score(&mut am, config, depth);
                     score = score_and_width.score;
                     if score_and_width.width >= TARGET_WIDTH {
